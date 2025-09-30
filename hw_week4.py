@@ -110,7 +110,7 @@ print(f"반 정원들: {CAPACITIES}")
 # 1. 학생들 성적
 student_scores = {sid: (0 if pd.isna(sc) else int(sc)) for sid, sc in zip(df['id'], df['score'])}
 
-#  2. 학생들 싫어하는 관계 
+# 2. 학생들 싫어하는 관계 
 student_dislikes = set()
 id_set = set(df['id'].to_list())
 for _, row in df.iterrows():
@@ -209,7 +209,6 @@ for idx, c in enumerate(CLASSROOM_IDS):
     model.Add(sum(x[s, c] for s in piano_ids) == piano_targets[idx])
 
 # 제약조건 (4) 성적 균형(반별 총점 허용범위)
-#  정수화 위해 점수는 int, 허용범위도 int로 변환
 for idx, c in enumerate(CLASSROOM_IDS):
     model.Add(sum(student_scores[s] * x[s, c] for s in students) >= int(min_class_score[idx]))
     model.Add(sum(student_scores[s] * x[s, c] for s in students) <= int(max_class_score[idx]))
@@ -218,7 +217,7 @@ for idx, c in enumerate(CLASSROOM_IDS):
 for idx, c in enumerate(CLASSROOM_IDS):
     model.Add(sum(x[s, c] for s in truancy_ids) == truancy_targets[idx])
 
-# 제약조건 (6) 남녀 균등(정확 타깃)
+# 제약조건 (6) 남녀 균등
 for idx, c in enumerate(CLASSROOM_IDS):
     model.Add(sum(x[s, c] for s in male_ids)   == male_targets[idx])
     model.Add(sum(x[s, c] for s in female_ids) == female_targets[idx])
@@ -253,7 +252,6 @@ if status in (cp_model.OPTIMAL, cp_model.FEASIBLE):
         for c in CLASSROOM_IDS:
             if solver.Value(x[s, c]) == 1:
                 classroom_assignments[c].append(s)
-                # 학생별 배정 결과 df에 기록
                 df.loc[df['id'] == s, 'assigned_class'] = c + 1  # 1반~6반으로 표현
                 break
 
@@ -280,7 +278,6 @@ if status in (cp_model.OPTIMAL, cp_model.FEASIBLE):
     output_filename = f"classroom_assignment_{timestamp}.csv"
     full_path = os.path.join(output_dir, output_filename)
 
-    # 기존 df에 assigned_class 열을 포함해 전체 저장
     df.to_csv(full_path, index=False, encoding='utf-8-sig')
     print(f"\nResults saved to {full_path}")
 else:
